@@ -25,7 +25,6 @@
     .locked-content { display: none; }
     .auth-card { background: white; padding: 50px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
     
-    /* Animation for the Next button when reward is ready */
     .btn-pulse {
         animation: pulse-blue 2s infinite;
         box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
@@ -50,7 +49,7 @@
             <button class="btn btn-link text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
             <button class="btn btn-primary btn-sm px-3 shadow-sm fw-bold ms-2" data-bs-toggle="modal" data-bs-target="#signUpModal">Sign Up</button>
         </div>
-        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" onclick="location.reload()">Logout</button>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" onclick="handleLogout()">Logout</button>
     </div>
   </div>
 </nav>
@@ -87,9 +86,10 @@
             <div class="card p-4 h-100">
                 <h6 class="fw-bold text-primary mb-3"><i class="fas fa-gift me-2"></i>Invite & Earn</h6>
                 <div class="input-group">
-                    <input type="text" class="form-control bg-light border-0" id="referralLink" readonly>
+                    <input type="text" class="form-control bg-light border-0" id="referralLink" placeholder="Generating your link..." readonly>
                     <button class="btn btn-primary" onclick="copyReferral()"><i class="fas fa-copy"></i></button>
                 </div>
+                <small class="text-muted mt-2 d-block">Share this link. You get $2.00 for every friend who joins!</small>
             </div>
         </div>
     </div>
@@ -130,7 +130,7 @@
     <h4 class="fw-bold text-center mb-4">Welcome Back</h4>
     <form onsubmit="handleAuth(event, 'loginModal')">
         <input type="email" class="form-control mb-3 bg-light border-0" placeholder="Email Address" required>
-        <input type="password" class="form-control mb-4 bg-light border-0" placeholder="Password" required>
+        <input type="password" id="loginPass" class="form-control mb-4 bg-light border-0" placeholder="Password" required>
         <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">Sign In</button>
     </form>
 </div></div></div></div>
@@ -147,37 +147,65 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-let currentBalance = 0.00;
-let userRefCode = "";
+// --- DATA PERSISTENCE ---
+let currentBalance = parseFloat(localStorage.getItem('user_balance')) || 0.00;
+let historyHTML = localStorage.getItem('user_history') || "";
+let bonusClaimed = localStorage.getItem('bonus_claimed') === 'true';
+let savedRefLink = localStorage.getItem('user_ref_link') || "";
+
 var player;
 var watchTimer;
 var secondsElapsed = 0;
-var isEligibleToEarn = true; // Flag to stop timer until "Next Video" is clicked
+var isEligibleToEarn = true;
 
 window.onload = function() {
+    // Check for referral in URL
     const urlParams = new URLSearchParams(window.location.search);
     const refBy = urlParams.get('ref');
     if (refBy) {
         document.getElementById('refAlert').classList.remove('d-none');
         sessionStorage.setItem('referredBy', refBy);
     }
+    
+    // Restore Balance and History
+    document.querySelectorAll('.balance-text').forEach(el => el.innerText = currentBalance.toFixed(2));
+    document.getElementById('activityLog').innerHTML = historyHTML;
+    
+    // Restore Referral Link if it exists
+    if(savedRefLink) {
+        document.getElementById('referralLink').value = savedRefLink;
+    }
 };
 
 function handleAuth(event, modalId) {
     event.preventDefault();
-    let name = document.getElementById('signupName').value || "user" + Math.floor(Math.random() * 999);
-    userRefCode = name.toLowerCase().replace(/\s+/g, '') + Math.floor(Math.random() * 99);
-    document.getElementById('referralLink').value = window.location.origin + window.location.pathname + "?ref=" + userRefCode;
+    
+    // Generate Referral Link if not already exists
+    if(!savedRefLink) {
+        let nameInput = document.getElementById('signupName') ? document.getElementById('signupName').value : "user";
+        let randomID = Math.floor(1000 + Math.random() * 9000);
+        let code = nameInput.toLowerCase().replace(/\s+/g, '') + randomID;
+        savedRefLink = window.location.origin + window.location.pathname + "?ref=" + code;
+        localStorage.setItem('user_ref_link', savedRefLink);
+    }
+    
+    document.getElementById('referralLink').value = savedRefLink;
 
+    // UI transitions
     document.getElementById('authPrompt').classList.add('d-none');
     document.getElementById('navAuthBtns').classList.add('d-none');
     document.getElementById('navBalanceContainer').classList.remove('d-none');
     document.getElementById('logoutBtn').classList.remove('d-none');
     document.getElementById('mainContent').classList.remove('locked-content');
 
-    updateBalance(5.00, "Sign-up Bonus");
-    if(modalId === 'signUpModal' && sessionStorage.getItem('referredBy')) {
-        updateBalance(2.00, "Referral Welcome Bonus");
+    // Give bonus
+    if (!bonusClaimed) {
+        updateBalance(5.00, "Sign-up Bonus");
+        if(sessionStorage.getItem('referredBy')) {
+            updateBalance(2.00, "Referral Welcome Bonus");
+        }
+        localStorage.setItem('bonus_claimed', 'true');
+        bonusClaimed = true;
     }
 
     let modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
@@ -193,15 +221,37 @@ function updateBalance(amount, reason) {
     entry.className = "d-flex justify-content-between align-items-center p-2 rounded bg-light mb-2 small border-start border-3 border-success";
     entry.innerHTML = `<span>${reason}</span><span class="text-success fw-bold">+$${amount.toFixed(2)}</span>`;
     log.prepend(entry);
+
+    localStorage.setItem('user_balance', currentBalance);
+    localStorage.setItem('user_history', log.innerHTML);
+}
+
+function handleLogout() {
+    location.reload(); 
 }
 
 function copyReferral() {
     var copyText = document.getElementById("referralLink");
+    if(!copyText.value || copyText.value.includes("Generating")) {
+        alert("Please log in first to get your link!");
+        return;
+    }
     copyText.select();
+    copyText.setSelectionRange(0, 99999); 
     navigator.clipboard.writeText(copyText.value);
-    alert("Referral link copied!");
+    
+    // Visual feedback
+    const btn = event.currentTarget;
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i>';
+    btn.classList.replace('btn-primary', 'btn-success');
+    setTimeout(() => {
+        btn.innerHTML = oldHtml;
+        btn.classList.replace('btn-success', 'btn-primary');
+    }, 2000);
 }
 
+// YT Player logic remains the same
 function initYouTubePlayer() {
     if (!window.YT) {
         var tag = document.createElement('script');
@@ -220,56 +270,40 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerStateChange(event) {
     const status = document.getElementById('status-message');
-    
-    // Timer starts ONLY if user is eligible (has clicked Next Video after previous reward)
     if (event.data == YT.PlayerState.PLAYING && isEligibleToEarn) {
         status.classList.remove('d-none');
         clearInterval(watchTimer);
-        
         watchTimer = setInterval(() => {
             secondsElapsed++;
-            status.innerHTML = `<i class="fas fa-sync fa-spin me-2 text-primary"></i>Tracking: ${secondsElapsed}s / 60s (Next Reward: $1.00)`;
-            
+            status.innerHTML = `<i class="fas fa-sync fa-spin me-2 text-primary"></i>Tracking: ${secondsElapsed}s / 60s (Reward: $1.00)`;
             if(secondsElapsed >= 60) {
-                clearInterval(watchTimer); // Stop timer immediately
-                isEligibleToEarn = false;   // Lock earning until "Next Video" is clicked
+                clearInterval(watchTimer);
+                isEligibleToEarn = false;
                 updateBalance(1.00, "60s Watch Reward");
-                
-                // Update UI to prompt user
-                status.innerHTML = '<span class="text-success fw-bold"><i class="fas fa-check-circle me-2"></i>$1.00 Added! Click "Next Video" to continue earning.</span>';
+                status.innerHTML = '<span class="text-success fw-bold">Reward Added! Click Next Video.</span>';
                 document.getElementById('nextVideoBtn').classList.add('btn-pulse');
-                
-                alert("Earned $1.00! To continue earning, please click the 'Next Video' button.");
+                alert("Earned $1.00!");
             }
         }, 1000);
     } else {
         clearInterval(watchTimer);
-        if(!isEligibleToEarn) {
-             status.innerHTML = '<span class="text-warning fw-bold">Reward paused. Please click "Next Video" to start the next 60s timer.</span>';
-        } else if(event.data == YT.PlayerState.PAUSED) {
-            status.innerHTML = '<i class="fas fa-pause me-2 text-warning"></i>Paused. Resume to continue tracking time.';
-        }
     }
 }
 
 function playNextVideo() {
     if (player && typeof player.nextVideo === 'function') {
-        secondsElapsed = 0;       // Reset timer count
-        isEligibleToEarn = true;   // Unlock earning for the next 60s
+        secondsElapsed = 0;
+        isEligibleToEarn = true;
         document.getElementById('nextVideoBtn').classList.remove('btn-pulse');
-        document.getElementById('status-message').innerHTML = "Preparing next video...";
         player.nextVideo();
-    } else {
-        alert("Player is still loading.");
     }
 }
 
 function requestPayout() {
-    const minPayout = 100.00;
-    if(currentBalance < minPayout) {
-        alert("Minimum payout is $" + minPayout.toFixed(2) + ". You need $" + (minPayout - currentBalance).toFixed(2) + " more.");
+    if(currentBalance < 100.00) {
+        alert("Minimum payout is $100.00. Keep watching!");
     } else {
-        alert("Withdrawal request for $" + currentBalance.toFixed(2) + " sent! Check your email for confirmation.");
+        alert("Withdrawal request for $" + currentBalance.toFixed(2) + " sent!");
     }
 }
 </script>
