@@ -45,7 +45,6 @@
         <button class="btn btn-link fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
         <button class="btn btn-primary btn-sm fw-bold shadow-sm ms-2" data-bs-toggle="modal" data-bs-target="#signUpModal">Sign Up</button>
       </div>
-      <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" onclick="handleLogout()">Logout</button>
     </div>
   </div>
 </nav>
@@ -130,7 +129,7 @@
       <div class="modal-body p-5">
         <h4 class="fw-bold text-center mb-4">Welcome Back</h4>
         <form id="loginForm">
-          <input type="email" class="form-control mb-3 bg-light border-0" placeholder="Email Address" required>
+          <input id="loginEmail" type="email" class="form-control mb-3 bg-light border-0" placeholder="Email Address" required>
           <input type="password" class="form-control mb-4 bg-light border-0" placeholder="Password" required>
           <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">Sign In</button>
         </form>
@@ -147,7 +146,7 @@
         <h4 class="fw-bold text-center mb-4">Create Free Account</h4>
         <form id="signupForm">
           <input type="text" id="signupName" class="form-control mb-3 bg-light border-0" placeholder="Full Name" required>
-          <input type="email" class="form-control mb-3 bg-light border-0" placeholder="Email Address" required>
+          <input id="signupEmail" type="email" class="form-control mb-3 bg-light border-0" placeholder="Email Address" required>
           <input type="password" class="form-control mb-4 bg-light border-0" placeholder="Create Password" required>
           <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">Sign Up & Get Bonus</button>
         </form>
@@ -158,79 +157,69 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-let currentBalance = parseFloat(localStorage.getItem('user_balance')) || 0.00;
-let historyHTML = localStorage.getItem('user_history') || "";
-let bonusClaimed = localStorage.getItem('bonus_claimed') === 'true';
-let userRefCode = localStorage.getItem('user_ref_code') || "";
 let player, watchTimer, secondsElapsed = 0, isEligibleToEarn = true;
+let activeUser = null;
 
 window.addEventListener("DOMContentLoaded", () => {
-  const params = new URLSearchParams(window.location.search);
-  const refBy = params.get('ref');
+  const refBy = new URLSearchParams(window.location.search).get('ref');
   if (refBy) {
     document.getElementById('refAlert').classList.remove('d-none');
     sessionStorage.setItem('referredBy', refBy);
   }
-  document.querySelectorAll('.balance-text').forEach(el => el.innerText = currentBalance.toFixed(2));
-  document.getElementById('activityLog').innerHTML = historyHTML;
-  if (userRefCode) document.getElementById("referralLink").value = `${window.location.origin}?ref=${userRefCode}`;
+  if (sessionStorage.getItem('active_email')) loginUser(sessionStorage.getItem('active_email'));
 });
 
-// Attach event listeners safely after DOM load
-document.getElementById("signupForm").addEventListener("submit", e => handleAuth(e, 'signUpModal'));
-document.getElementById("loginForm").addEventListener("submit", e => handleAuth(e, 'loginModal'));
+document.getElementById("signupForm").addEventListener("submit", e => handleSignup(e));
+document.getElementById("loginForm").addEventListener("submit", e => handleLogin(e));
 
-function handleAuth(e, modalId) {
+function handleSignup(e) {
   e.preventDefault();
+  const email = document.getElementById('signupEmail').value.toLowerCase();
+  const name = document.getElementById('signupName').value;
+  if (!localStorage.getItem('user_' + email)) {
+    const newUser = { name, email, balance: 5.00, history: "", ref: name.replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 10000), bonusClaimed: true };
+    if (sessionStorage.getItem('referredBy')) newUser.balance += 2.00;
+    localStorage.setItem('user_' + email, JSON.stringify(newUser));
+  }
+  loginUser(email);
+  bootstrap.Modal.getInstance(document.getElementById('signUpModal')).hide();
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.toLowerCase();
+  if (localStorage.getItem('user_' + email)) {
+    loginUser(email);
+    bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+  } else {
+    alert("No account found for this email. Please sign up.");
+  }
+}
+
+function loginUser(email) {
+  activeUser = JSON.parse(localStorage.getItem('user_' + email));
+  sessionStorage.setItem('active_email', email);
   document.getElementById('authPrompt').classList.add('d-none');
+  document.getElementById('mainContent').classList.remove('locked-content');
   document.getElementById('navAuthBtns').classList.add('d-none');
   document.getElementById('navBalanceContainer').classList.remove('d-none');
-  document.getElementById('logoutBtn').classList.remove('d-none');
-  document.getElementById('mainContent').classList.remove('locked-content');
-
-  if (!userRefCode) {
-    const name = document.getElementById('signupName')?.value || "user";
-    userRefCode = name.replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 10000);
-    localStorage.setItem('user_ref_code', userRefCode);
-  }
-  document.getElementById("referralLink").value = `${window.location.origin}?ref=${userRefCode}`;
-
-  if (!bonusClaimed) {
-    updateBalance(5.00, "Sign-up Bonus");
-    if (modalId === 'signUpModal' && sessionStorage.getItem('referredBy')) {
-      updateBalance(2.00, "Referral Welcome Bonus");
-    }
-    localStorage.setItem('bonus_claimed', 'true');
-    bonusClaimed = true;
-  }
-
-  const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
-  if (modal) modal.hide();
+  document.querySelectorAll('.balance-text').forEach(el => el.innerText = activeUser.balance.toFixed(2));
+  document.getElementById('activityLog').innerHTML = activeUser.history || "";
+  document.getElementById("referralLink").value = `${window.location.origin}?ref=${activeUser.ref}`;
   initYouTubePlayer();
 }
 
-function copyReferral(btn) {
-  const copyText = document.getElementById("referralLink");
-  copyText.select();
-  navigator.clipboard.writeText(copyText.value).then(() => {
-    btn.innerHTML = '<i class="fas fa-check text-success"></i>';
-    setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 1500);
-  });
-}
-
 function updateBalance(amount, reason) {
-  currentBalance += amount;
-  document.querySelectorAll('.balance-text').forEach(el => el.innerText = currentBalance.toFixed(2));
+  activeUser.balance += amount;
+  document.querySelectorAll('.balance-text').forEach(el => el.innerText = activeUser.balance.toFixed(2));
   const log = document.getElementById('activityLog');
   const entry = document.createElement('div');
   entry.className = "d-flex justify-content-between align-items-center p-2 rounded bg-light mb-2 small border-start border-3 border-success";
   entry.innerHTML = `<span>${reason}</span><span class='text-success fw-bold'>+$${amount.toFixed(2)}</span>`;
   log.prepend(entry);
-  localStorage.setItem('user_balance', currentBalance);
-  localStorage.setItem('user_history', log.innerHTML);
+  activeUser.history = log.innerHTML;
+  localStorage.setItem('user_' + activeUser.email, JSON.stringify(activeUser));
 }
-
-function handleLogout() { location.reload(); }
 
 function initYouTubePlayer() {
   if (!window.YT) {
@@ -262,7 +251,7 @@ function onPlayerStateChange(e) {
         updateBalance(1.00, "60s Watch Reward");
         status.innerHTML = "<span class='text-success fw-bold'>Reward Added! Click Next Video.</span>";
         document.getElementById('nextVideoBtn').classList.add('btn-pulse');
-        alert("Earned $1.00!");
+        alert("🎉 Earned $1.00!");
       }
     }, 1000);
   } else clearInterval(watchTimer);
@@ -277,12 +266,19 @@ function playNextVideo() {
   }
 }
 
+function copyReferral(btn) {
+  const copyText = document.getElementById("referralLink");
+  copyText.select();
+  navigator.clipboard.writeText(copyText.value).then(() => {
+    btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+    setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 1500);
+  });
+}
+
 function requestPayout() {
-  if (currentBalance < 100.00) alert("Minimum payout is $100.00.");
-  else alert("Withdrawal request for $" + currentBalance.toFixed(2) + " sent!");
+  if (activeUser.balance < 100.00) alert("Minimum payout is $100.00.");
+  else alert("Withdrawal request for $" + activeUser.balance.toFixed(2) + " sent!");
 }
 </script>
 </body>
 </html>
-
-
