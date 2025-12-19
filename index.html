@@ -4,10 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cash View - Watch & Earn</title>
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
   <style>
     :root {
       --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -15,273 +13,274 @@
     }
     body {
       background-color: #f4f7fe;
-      background-image:
-        radial-gradient(at 0% 0%, rgba(102,126,234,0.15) 0, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(118,75,162,0.15) 0, transparent 50%);
-      min-height: 100vh;
+      background-image: radial-gradient(at 0% 0%, rgba(102,126,234,0.15) 0, transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(118,75,162,0.15) 0, transparent 50%);
       font-family: 'Inter', sans-serif;
+      min-height: 100vh;
     }
-    .navbar { background: var(--glass-bg)!important; backdrop-filter: blur(10px); }
+    .navbar { background: var(--glass-bg)!important; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .card { border: none; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); transition: transform 0.3s ease; }
+    .card:hover { transform: translateY(-5px); }
+    .cashout-banner { background: var(--primary-gradient); color: #fff; border-radius: 16px; padding: 30px; }
     .locked-content { display: none; }
-    .card { border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-    .withdraw-banner { background: #6f42c1; color: white; border-radius: 15px; padding: 20px; }
-    .history-item { border-left: 4px solid #28a745; background: #fff; margin-bottom: 10px; padding: 12px; font-size: 0.85rem; border-radius: 8px; }
-    .ref-link-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 8px; font-family: monospace; font-size: 0.8rem; }
-    .btn-pulse { animation: pulse-blue 2s infinite; }
-    @keyframes pulse-blue {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(111, 66, 193, 0.7); }
-        70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(111, 66, 193, 0); }
-        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(111, 66, 193, 0); }
+    .auth-card { background: #fff; padding: 50px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+    .btn-pulse { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(102,126,234,0.6); }
+      70% { box-shadow: 0 0 0 15px rgba(102,126,234,0); }
+      100% { box-shadow: 0 0 0 0 rgba(102,126,234,0); }
     }
   </style>
 </head>
-
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light sticky-top shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="#" onclick="location.reload()">💰 Cash View</a>
+    <a class="navbar-brand fw-bold" href="#" onclick="location.reload()"><i class="fas fa-coins me-2 text-primary"></i>Cash View</a>
     <div class="ms-auto d-flex align-items-center">
       <div id="navBalanceContainer" class="me-3 d-none">
-        <strong class="text-success">$<span class="balance-text">0.00</span></strong>
+        <span class="fw-bold text-success">$<span class="balance-text">0.00</span></span>
       </div>
       <div id="navAuthBtns">
-        <button class="btn btn-link text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
-        <button class="btn btn-primary btn-sm px-3 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#signUpModal">Sign Up</button>
+        <button class="btn btn-link fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+        <button class="btn btn-primary btn-sm fw-bold shadow-sm ms-2" data-bs-toggle="modal" data-bs-target="#signUpModal">Sign Up</button>
       </div>
-      <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none fw-bold" onclick="logoutUser()">Logout</button>
+      <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" onclick="handleLogout()">Logout</button>
     </div>
   </div>
 </nav>
 
-<div id="authPrompt" class="container d-flex justify-content-center align-items-center" style="min-height:85vh">
-  <div class="text-center bg-white p-5 rounded-4 shadow-lg" style="max-width: 500px;">
-    <i class="fas fa-play-circle fa-4x text-primary mb-4"></i>
+<!-- Auth Section -->
+<div id="authPrompt" class="container d-flex align-items-center justify-content-center" style="min-height: 85vh;">
+  <div class="auth-card text-center">
+    <i class="fas fa-wallet fa-4x text-primary mb-4"></i>
     <h2 class="fw-bold mb-3">Earn Money Watching Videos</h2>
-    <p class="text-muted mb-4">Sign up now and get a <b>$5.00 Instant Bonus</b> + earn $1.00 for every minute watched!</p>
-    <button class="btn btn-primary btn-lg w-100 shadow" data-bs-toggle="modal" data-bs-target="#signUpModal">Create Free Account</button>
+    <p class="text-muted mb-4">Join thousands of users and get a $5 bonus upon signup!</p>
+    <div id="refAlert" class="alert alert-success d-none mb-4 small">
+      <i class="fas fa-gift me-2"></i>You were invited! Extra $2.00 bonus pending.
+    </div>
+    <div class="d-grid gap-2">
+      <button class="btn btn-primary btn-lg shadow" data-bs-toggle="modal" data-bs-target="#signUpModal">Create Free Account</button>
+      <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#loginModal">Already a member? Login</button>
+    </div>
   </div>
 </div>
 
+<!-- Dashboard -->
 <div id="mainContent" class="container mt-4 locked-content">
-  <div class="row g-4 mb-4">
+  <div class="d-flex align-items-center mb-4">
+    <div class="bg-primary p-2 rounded-3 me-3"><i class="fas fa-chart-pie text-white"></i></div>
+    <h3 class="fw-bold mb-0">User Dashboard</h3>
+  </div>
+
+  <div class="row g-4">
     <div class="col-md-4">
-      <div class="card h-100 p-4 text-center">
-        <h6 class="text-muted text-uppercase small fw-bold">Available Balance</h6>
-        <h1 class="display-5 fw-bold text-success">$<span class="balance-text">0.00</span></h1>
+      <div class="card p-4 text-center h-100 border-bottom border-success border-5">
+        <p class="text-muted text-uppercase small fw-bold mb-2">Available Balance</p>
+        <h1 class="display-5 fw-bold text-success mb-0">$<span class="balance-text">0.00</span></h1>
       </div>
     </div>
     <div class="col-md-8">
-      <div class="card h-100 p-4">
-        <div class="d-flex align-items-center mb-2">
-          <i class="fas fa-gift text-primary me-2"></i>
-          <h6 class="fw-bold mb-0">Invite & Earn</h6>
-        </div>
-        <p class="small text-muted mb-2">Share your link and earn <b>$2.00</b> for every friend who joins!</p>
-        <div class="d-flex gap-2">
-          <div id="referralLink" class="ref-link-box flex-grow-1 overflow-hidden text-truncate">Loading link...</div>
-          <button class="btn btn-primary btn-sm" onclick="copyReferral()"><i class="fas fa-copy"></i></button>
+      <div class="card p-4 h-100">
+        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-gift me-2"></i>Invite & Earn</h6>
+        <div class="input-group">
+          <input type="text" id="referralLink" class="form-control bg-light border-0" readonly>
+          <button class="btn btn-primary" onclick="copyReferral(this)"><i class="fas fa-copy"></i></button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="withdraw-banner d-flex justify-content-between align-items-center mb-4 shadow-sm">
+  <div class="cashout-banner d-flex justify-content-between align-items-center my-4">
     <div>
-      <h4 class="fw-bold mb-1">Withdraw Your Earnings</h4>
-      <p class="mb-0 small opacity-75">Minimum threshold: $100.00</p>
+      <h4 class="fw-bold mb-1">Cash Out Your Earnings</h4>
+      <p class="mb-0 opacity-75 small">Withdrawals process when you reach $100.00.</p>
     </div>
-    <button class="btn btn-light fw-bold px-4 py-2" onclick="handleWithdraw()">Withdraw Now</button>
+    <button class="btn btn-light fw-bold text-primary px-4 py-2" onclick="requestPayout()">Withdraw Now</button>
   </div>
 
-  <div class="row">
-    <div class="col-lg-8">
-      <div class="card overflow-hidden shadow-lg border-0 mb-3">
+  <div class="row g-4 mt-2">
+    <div class="col-md-8">
+      <div class="card overflow-hidden shadow-lg border-0">
         <div class="ratio ratio-16x9 bg-dark"><div id="player"></div></div>
-        <div class="card-body bg-white border-top">
-          <div id="status-message" class="alert alert-secondary py-2 mb-3 text-center">Play the video to start earning.</div>
+        <div class="card-body p-4 bg-white">
           <div class="d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold mb-0">Video Player</h5>
-            <button id="nextBtn" class="btn btn-primary fw-bold px-4" onclick="playNextVideo()">Next Video <i class="fas fa-forward ms-2"></i></button>
+            <h5 class="fw-bold mb-0">Watch & Earn Content</h5>
+            <button id="nextVideoBtn" class="btn btn-primary fw-bold px-4" onclick="playNextVideo()">
+              Next Video <i class="fas fa-forward ms-2"></i>
+            </button>
           </div>
+          <div id="status-message" class="alert alert-info py-2 mt-3 d-none border-0 small">Tracking watch time...</div>
         </div>
       </div>
     </div>
-
-    <div class="col-lg-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="fw-bold mb-3"><i class="fas fa-history me-2 text-muted"></i>Activity History</h6>
-        <div id="historyList" style="max-height: 450px; overflow-y: auto;">
-          <p class="text-center text-muted small mt-4">No recent activity</p>
-        </div>
+    <div class="col-md-4">
+      <div class="card p-4 mb-4">
+        <h6 class="fw-bold mb-3"><i class="fas fa-history me-2"></i>Activity History</h6>
+        <div id="activityLog" style="max-height: 400px; overflow-y: auto;"></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODALS -->
+<!-- Login Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content p-4 border-0 shadow">
-      <h4 class="fw-bold text-center mb-4">Login</h4>
-      <form id="loginForm">
-        <input id="loginEmail" type="email" class="form-control mb-3 bg-light border-0" placeholder="Email Address" required>
-        <input id="loginPass" type="password" class="form-control mb-3 bg-light border-0" placeholder="Password" required>
-        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Login</button>
-      </form>
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-body p-5">
+        <h4 class="fw-bold text-center mb-4">Welcome Back</h4>
+        <form id="loginForm">
+          <input type="email" class="form-control mb-3 bg-light border-0" placeholder="Email Address" required>
+          <input type="password" class="form-control mb-4 bg-light border-0" placeholder="Password" required>
+          <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">Sign In</button>
+        </form>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- Sign Up Modal -->
 <div class="modal fade" id="signUpModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content p-4 border-0 shadow">
-      <h4 class="fw-bold text-center mb-4">Create Account</h4>
-      <form id="signupForm">
-        <input id="signupName" type="text" class="form-control mb-3 bg-light border-0" placeholder="Full Name" required>
-        <input id="signupEmail" type="email" class="form-control mb-3 bg-light border-0" placeholder="Email" required>
-        <input id="signupPass" type="password" class="form-control mb-3 bg-light border-0" placeholder="Password" required>
-        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Sign Up & Get $5 Bonus</button>
-      </form>
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-body p-5">
+        <h4 class="fw-bold text-center mb-4">Create Free Account</h4>
+        <form id="signupForm">
+          <input type="text" id="signupName" class="form-control mb-3 bg-light border-0" placeholder="Full Name" required>
+          <input type="email" class="form-control mb-3 bg-light border-0" placeholder="Email Address" required>
+          <input type="password" class="form-control mb-4 bg-light border-0" placeholder="Create Password" required>
+          <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">Sign Up & Get Bonus</button>
+        </form>
+      </div>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
 <script>
-firebase.initializeApp({
-  apiKey: "AIzaSyDASW2JB6GPeUyL1jz-Usd76Nt6IImEL_8",
-  authDomain: "watch-and-earn--videos.firebaseapp.com",
-  projectId: "watch-and-earn--videos",
-  storageBucket: "watch-and-earn--videos.firebasestorage.app",
-  messagingSenderId: "821995127822",
-  appId: "1:821995127822:web:f9e9c4c87d7700c835a85f"
-});
-const auth = firebase.auth();
+let currentBalance = parseFloat(localStorage.getItem('user_balance')) || 0.00;
+let historyHTML = localStorage.getItem('user_history') || "";
+let bonusClaimed = localStorage.getItem('bonus_claimed') === 'true';
+let userRefCode = localStorage.getItem('user_ref_code') || "";
+let player, watchTimer, secondsElapsed = 0, isEligibleToEarn = true;
 
-let activeUser = null, player, watchTimer, secondsElapsed = 0, canEarnOnThisVideo = true;
-
-/* AUTH LOGIC */
-document.getElementById("signupForm").onsubmit = e => {
-  e.preventDefault();
-  const email = signupEmail.value.toLowerCase();
-  const password = signupPass.value;
-  const name = signupName.value;
-  const refCode = name.substring(0,3).toLowerCase() + Math.floor(1000 + Math.random()*9000);
-
-  auth.createUserWithEmailAndPassword(email,password)
-      .then(() => {
-          const userData = {name,email,balance:5.00,refCode,history:[{type:"Welcome Bonus",amount:5.00,date:Date.now()}]};
-          localStorage.setItem("user_"+email,JSON.stringify(userData));
-          bootstrap.Modal.getInstance(signUpModal).hide();
-      }).catch(err=>alert(err.message));
-};
-
-document.getElementById("loginForm").onsubmit = e => {
-  e.preventDefault();
-  auth.signInWithEmailAndPassword(loginEmail.value.toLowerCase(),loginPass.value)
-      .then(()=>bootstrap.Modal.getInstance(loginModal).hide())
-      .catch(err=>alert(err.message));
-};
-
-auth.onAuthStateChanged(user => {
-  if(!user) return;
-  const email=user.email.toLowerCase();
-  if(!localStorage.getItem("user_"+email))
-    localStorage.setItem("user_"+email,JSON.stringify({email,balance:5.00,history:[{type:"Welcome Bonus",amount:5,date:Date.now()}],refCode:'user'+Date.now()}));
-  loginUser(email);
+window.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const refBy = params.get('ref');
+  if (refBy) {
+    document.getElementById('refAlert').classList.remove('d-none');
+    sessionStorage.setItem('referredBy', refBy);
+  }
+  document.querySelectorAll('.balance-text').forEach(el => el.innerText = currentBalance.toFixed(2));
+  document.getElementById('activityLog').innerHTML = historyHTML;
+  if (userRefCode) document.getElementById("referralLink").value = `${window.location.origin}?ref=${userRefCode}`;
 });
 
-function loginUser(email){
-  activeUser=JSON.parse(localStorage.getItem("user_"+email));
-  authPrompt.classList.add("d-none");
-  mainContent.classList.remove("locked-content");
-  navAuthBtns.classList.add("d-none");
-  navBalanceContainer.classList.remove("d-none");
-  logoutBtn.classList.remove("d-none");
-  referralLink.innerText=window.location.origin+window.location.pathname+"?ref="+activeUser.refCode;
-  updateUI();
+// Attach event listeners safely after DOM load
+document.getElementById("signupForm").addEventListener("submit", e => handleAuth(e, 'signUpModal'));
+document.getElementById("loginForm").addEventListener("submit", e => handleAuth(e, 'loginModal'));
+
+function handleAuth(e, modalId) {
+  e.preventDefault();
+  document.getElementById('authPrompt').classList.add('d-none');
+  document.getElementById('navAuthBtns').classList.add('d-none');
+  document.getElementById('navBalanceContainer').classList.remove('d-none');
+  document.getElementById('logoutBtn').classList.remove('d-none');
+  document.getElementById('mainContent').classList.remove('locked-content');
+
+  if (!userRefCode) {
+    const name = document.getElementById('signupName')?.value || "user";
+    userRefCode = name.replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 10000);
+    localStorage.setItem('user_ref_code', userRefCode);
+  }
+  document.getElementById("referralLink").value = `${window.location.origin}?ref=${userRefCode}`;
+
+  if (!bonusClaimed) {
+    updateBalance(5.00, "Sign-up Bonus");
+    if (modalId === 'signUpModal' && sessionStorage.getItem('referredBy')) {
+      updateBalance(2.00, "Referral Welcome Bonus");
+    }
+    localStorage.setItem('bonus_claimed', 'true');
+    bonusClaimed = true;
+  }
+
+  const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+  if (modal) modal.hide();
   initYouTubePlayer();
 }
 
-function updateUI(){
-  if(!activeUser) return;
-  document.querySelectorAll(".balance-text").forEach(el=>el.textContent=parseFloat(activeUser.balance).toFixed(2));
-  if(activeUser.history){
-    historyList.innerHTML=activeUser.history.map(item=>`
-      <div class="history-item d-flex justify-content-between align-items-center shadow-sm">
-        <div>
-          <div class="fw-bold">${item.type}</div>
-          <div class="text-muted small">${new Date(item.date).toLocaleTimeString()}</div>
-        </div>
-        <span class="text-success fw-bold">+$${parseFloat(item.amount).toFixed(2)}</span>
-      </div>
-    `).reverse().join('');
-  }
-}
-
-/* VIDEO EARNING LOGIC */
-function processReward(){
-  clearInterval(watchTimer);
-  canEarnOnThisVideo=false;
-  activeUser.balance+=1.00;
-  activeUser.history.push({type:"Watch Reward",amount:1.00,date:Date.now()});
-  localStorage.setItem("user_"+activeUser.email,JSON.stringify(activeUser));
-  updateUI();
-  status-message.className="alert alert-success py-2 mb-3 text-center";
-  status-message.innerHTML=`<strong>🎉 $1.00 Added!</strong> Maximum earned for this video. Click "Next Video" to continue.`;
-  nextBtn.classList.add("btn-pulse");
-}
-
-function onPlayerStateChange(event){
-  clearInterval(watchTimer);
-  if(event.data==YT.PlayerState.PLAYING){
-    if(canEarnOnThisVideo){
-      status-message.className="alert alert-info py-2 mb-3 text-center";
-      secondsElapsed=0;
-      watchTimer=setInterval(()=>{
-        secondsElapsed++;
-        status-message.innerHTML=`<i class="fas fa-clock fa-spin me-2"></i> Watching: ${secondsElapsed}s / 60s (Earning $1.00)`;
-        if(secondsElapsed>=60) processReward();
-      },1000);
-    } else {
-      status-message.className="alert alert-warning py-2 mb-3 text-center";
-      status-message.innerHTML="Earning locked. Please click 'Next Video' to earn more.";
-    }
-  }
-}
-
-function playNextVideo(){
-  secondsElapsed=0;
-  canEarnOnThisVideo=true;
-  nextBtn.classList.remove("btn-pulse");
-  status-message.className="alert alert-secondary py-2 mb-3 text-center";
-  status-message.innerHTML="Loading next video... Play to start earning.";
-  if(player && player.nextVideo) player.nextVideo();
-}
-
-function initYouTubePlayer(){
-  if(!window.YT){
-    const s=document.createElement("script");
-    s.src="https://www.youtube.com/iframe_api";
-    document.body.appendChild(s);
-  } else onYouTubeIframeAPIReady();
-}
-
-function onYouTubeIframeAPIReady(){
-  player=new YT.Player("player",{
-    height:'100%', width:'100%',
-    playerVars:{listType:"playlist",list:"PLeS3wE0be6j30ZBIW7lK6xnZSNMGybmoG",autoplay:0},
-    events:{'onStateChange':onPlayerStateChange}
+function copyReferral(btn) {
+  const copyText = document.getElementById("referralLink");
+  copyText.select();
+  navigator.clipboard.writeText(copyText.value).then(() => {
+    btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+    setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 1500);
   });
 }
 
-function copyReferral(){navigator.clipboard.writeText(referralLink.innerText);alert("Link copied!");}
-function handleWithdraw(){if(activeUser.balance<100)alert("Minimum $100.00 required.");else alert("Request sent!");}
-function logoutUser(){auth.signOut().then(()=>location.reload());}
+function updateBalance(amount, reason) {
+  currentBalance += amount;
+  document.querySelectorAll('.balance-text').forEach(el => el.innerText = currentBalance.toFixed(2));
+  const log = document.getElementById('activityLog');
+  const entry = document.createElement('div');
+  entry.className = "d-flex justify-content-between align-items-center p-2 rounded bg-light mb-2 small border-start border-3 border-success";
+  entry.innerHTML = `<span>${reason}</span><span class='text-success fw-bold'>+$${amount.toFixed(2)}</span>`;
+  log.prepend(entry);
+  localStorage.setItem('user_balance', currentBalance);
+  localStorage.setItem('user_history', log.innerHTML);
+}
+
+function handleLogout() { location.reload(); }
+
+function initYouTubePlayer() {
+  if (!window.YT) {
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+  } else onYouTubeIframeAPIReady();
+}
+
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('player', {
+    height: '100%', width: '100%',
+    playerVars: { listType: 'playlist', list: 'PLeS3wE0be6j30ZBIW7lK6xnZSNMGybmoG' },
+    events: { onStateChange: onPlayerStateChange }
+  });
+}
+
+function onPlayerStateChange(e) {
+  const status = document.getElementById('status-message');
+  if (e.data == YT.PlayerState.PLAYING && isEligibleToEarn) {
+    status.classList.remove('d-none');
+    clearInterval(watchTimer);
+    watchTimer = setInterval(() => {
+      secondsElapsed++;
+      status.innerHTML = `<i class='fas fa-sync fa-spin me-2 text-primary'></i>Tracking: ${secondsElapsed}s / 60s (Reward: $1.00)`;
+      if (secondsElapsed >= 60) {
+        clearInterval(watchTimer);
+        isEligibleToEarn = false;
+        updateBalance(1.00, "60s Watch Reward");
+        status.innerHTML = "<span class='text-success fw-bold'>Reward Added! Click Next Video.</span>";
+        document.getElementById('nextVideoBtn').classList.add('btn-pulse');
+        alert("Earned $1.00!");
+      }
+    }, 1000);
+  } else clearInterval(watchTimer);
+}
+
+function playNextVideo() {
+  if (player && typeof player.nextVideo === 'function') {
+    secondsElapsed = 0;
+    isEligibleToEarn = true;
+    document.getElementById('nextVideoBtn').classList.remove('btn-pulse');
+    player.nextVideo();
+  }
+}
+
+function requestPayout() {
+  if (currentBalance < 100.00) alert("Minimum payout is $100.00.");
+  else alert("Withdrawal request for $" + currentBalance.toFixed(2) + " sent!");
+}
 </script>
 </body>
 </html>
