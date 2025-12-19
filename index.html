@@ -24,29 +24,9 @@
     .navbar { background: var(--glass-bg)!important; backdrop-filter: blur(10px); }
     .locked-content { display: none; }
     .card { border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-    
-    .withdraw-banner {
-        background: #6f42c1;
-        color: white;
-        border-radius: 15px;
-        padding: 20px;
-    }
-    .history-item {
-        border-left: 4px solid #28a745;
-        background: #fff;
-        margin-bottom: 10px;
-        padding: 12px;
-        font-size: 0.85rem;
-        border-radius: 8px;
-    }
-    .ref-link-box {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 5px;
-        padding: 8px;
-        font-family: monospace;
-        font-size: 0.8rem;
-    }
+    .withdraw-banner { background: #6f42c1; color: white; border-radius: 15px; padding: 20px; }
+    .history-item { border-left: 4px solid #28a745; background: #fff; margin-bottom: 10px; padding: 12px; font-size: 0.85rem; border-radius: 8px; }
+    .ref-link-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 8px; font-family: monospace; font-size: 0.8rem; }
     .btn-pulse { animation: pulse-blue 2s infinite; }
     @keyframes pulse-blue {
         0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(111, 66, 193, 0.7); }
@@ -85,66 +65,61 @@
 
 <div id="mainContent" class="container mt-4 locked-content">
   <div class="row g-4 mb-4">
-      <div class="col-md-4">
-          <div class="card h-100 p-4 text-center">
-              <h6 class="text-muted text-uppercase small fw-bold">Available Balance</h6>
-              <h1 class="display-5 fw-bold text-success">$<span class="balance-text">0.00</span></h1>
-          </div>
+    <div class="col-md-4">
+      <div class="card h-100 p-4 text-center">
+        <h6 class="text-muted text-uppercase small fw-bold">Available Balance</h6>
+        <h1 class="display-5 fw-bold text-success">$<span class="balance-text">0.00</span></h1>
       </div>
-      <div class="col-md-8">
-          <div class="card h-100 p-4">
-              <div class="d-flex align-items-center mb-2">
-                <i class="fas fa-gift text-primary me-2"></i>
-                <h6 class="fw-bold mb-0">Invite & Earn</h6>
-              </div>
-              <p class="small text-muted mb-2">Share your link and earn <b>$2.00</b> for every friend who joins!</p>
-              <div class="d-flex gap-2">
-                  <div id="referralLink" class="ref-link-box flex-grow-1 overflow-hidden text-truncate">Loading link...</div>
-                  <button class="btn btn-primary btn-sm" onclick="copyReferral()"><i class="fas fa-copy"></i></button>
-              </div>
-          </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card h-100 p-4">
+        <div class="d-flex align-items-center mb-2">
+          <i class="fas fa-gift text-primary me-2"></i>
+          <h6 class="fw-bold mb-0">Invite & Earn</h6>
+        </div>
+        <p class="small text-muted mb-2">Share your link and earn <b>$2.00</b> for every friend who joins!</p>
+        <div class="d-flex gap-2">
+          <div id="referralLink" class="ref-link-box flex-grow-1 overflow-hidden text-truncate">Loading link...</div>
+          <button class="btn btn-primary btn-sm" onclick="copyReferral()"><i class="fas fa-copy"></i></button>
+        </div>
       </div>
+    </div>
   </div>
 
   <div class="withdraw-banner d-flex justify-content-between align-items-center mb-4 shadow-sm">
-      <div>
-          <h4 class="fw-bold mb-1">Withdraw Your Earnings</h4>
-          <p class="mb-0 small opacity-75">Minimum threshold: $100.00</p>
-      </div>
-      <button class="btn btn-light fw-bold px-4 py-2" onclick="handleWithdraw()">Withdraw Now</button>
+    <div>
+      <h4 class="fw-bold mb-1">Withdraw Your Earnings</h4>
+      <p class="mb-0 small opacity-75">Minimum threshold: $100.00</p>
+    </div>
+    <button class="btn btn-light fw-bold px-4 py-2" onclick="handleWithdraw()">Withdraw Now</button>
   </div>
 
   <div class="row">
     <div class="col-lg-8">
-        <div class="card overflow-hidden shadow-lg border-0 mb-3">
-            <div class="ratio ratio-16x9 bg-dark">
-              <div id="player"></div>
-            </div>
-            <div class="card-body bg-white border-top">
-                <div id="status-message" class="alert alert-secondary py-2 mb-3 text-center">
-                    Play the video to start earning.
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0">Video Player</h5>
-                    <button id="nextBtn" class="btn btn-primary fw-bold px-4" onclick="playNextVideo()">
-                        Next Video <i class="fas fa-forward ms-2"></i>
-                    </button>
-                </div>
-            </div>
+      <div class="card overflow-hidden shadow-lg border-0 mb-3">
+        <div class="ratio ratio-16x9 bg-dark"><div id="player"></div></div>
+        <div class="card-body bg-white border-top">
+          <div id="status-message" class="alert alert-secondary py-2 mb-3 text-center">Play the video to start earning.</div>
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">Video Player</h5>
+            <button id="nextBtn" class="btn btn-primary fw-bold px-4" onclick="playNextVideo()">Next Video <i class="fas fa-forward ms-2"></i></button>
+          </div>
         </div>
+      </div>
     </div>
 
     <div class="col-lg-4">
-        <div class="card p-3 shadow-sm">
-            <h6 class="fw-bold mb-3"><i class="fas fa-history me-2 text-muted"></i>Activity History</h6>
-            <div id="historyList" style="max-height: 450px; overflow-y: auto;">
-                <p class="text-center text-muted small mt-4">No recent activity</p>
-            </div>
+      <div class="card p-3 shadow-sm">
+        <h6 class="fw-bold mb-3"><i class="fas fa-history me-2 text-muted"></i>Activity History</h6>
+        <div id="historyList" style="max-height: 450px; overflow-y: auto;">
+          <p class="text-center text-muted small mt-4">No recent activity</p>
         </div>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- MODALS -->
 <div class="modal fade" id="loginModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content p-4 border-0 shadow">
@@ -177,7 +152,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <script>
-/* ================= FIREBASE & AUTH ================= */
 firebase.initializeApp({
   apiKey: "AIzaSyDASW2JB6GPeUyL1jz-Usd76Nt6IImEL_8",
   authDomain: "watch-and-earn--videos.firebaseapp.com",
@@ -188,189 +162,126 @@ firebase.initializeApp({
 });
 const auth = firebase.auth();
 
-let activeUser = null;
-let player;
-let watchTimer;
-let secondsElapsed = 0;
-let canEarnOnThisVideo = true; // New variable to lock earning per video
+let activeUser = null, player, watchTimer, secondsElapsed = 0, canEarnOnThisVideo = true;
 
-/* ================= AUTH FUNCTIONS ================= */
-
-document.getElementById("signupForm").onsubmit = (e) => {
+/* AUTH LOGIC */
+document.getElementById("signupForm").onsubmit = e => {
   e.preventDefault();
-  const email = document.getElementById("signupEmail").value.toLowerCase();
-  const password = document.getElementById("signupPass").value;
-  const name = document.getElementById("signupName").value;
-  const refCode = name.substring(0,3).toLowerCase() + Math.floor(1000 + Math.random() * 9000);
+  const email = signupEmail.value.toLowerCase();
+  const password = signupPass.value;
+  const name = signupName.value;
+  const refCode = name.substring(0,3).toLowerCase() + Math.floor(1000 + Math.random()*9000);
 
-  auth.createUserWithEmailAndPassword(email, password).then(() => {
-    const userData = {
-      name: name, email: email, balance: 5.00, refCode: refCode,
-      history: [{ type: "Welcome Bonus", amount: 5.00, date: Date.now() }]
-    };
-    localStorage.setItem("user_" + email, JSON.stringify(userData));
-    bootstrap.Modal.getInstance(document.getElementById("signUpModal")).hide();
-  }).catch(err => alert(err.message));
+  auth.createUserWithEmailAndPassword(email,password)
+      .then(() => {
+          const userData = {name,email,balance:5.00,refCode,history:[{type:"Welcome Bonus",amount:5.00,date:Date.now()}]};
+          localStorage.setItem("user_"+email,JSON.stringify(userData));
+          bootstrap.Modal.getInstance(signUpModal).hide();
+      }).catch(err=>alert(err.message));
 };
 
-document.getElementById("loginForm").onsubmit = (e) => {
+document.getElementById("loginForm").onsubmit = e => {
   e.preventDefault();
-  auth.signInWithEmailAndPassword(document.getElementById("loginEmail").value.toLowerCase(), document.getElementById("loginPass").value)
-  .then(() => bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide())
-  .catch(err => alert(err.message));
+  auth.signInWithEmailAndPassword(loginEmail.value.toLowerCase(),loginPass.value)
+      .then(()=>bootstrap.Modal.getInstance(loginModal).hide())
+      .catch(err=>alert(err.message));
 };
 
 auth.onAuthStateChanged(user => {
-  if (!user) return;
-  const email = user.email.toLowerCase();
-  if (!localStorage.getItem("user_" + email)) {
-    localStorage.setItem("user_" + email, JSON.stringify({ email, balance: 5.00, history: [{ type: "Welcome Bonus", amount: 5.00, date: Date.now() }], refCode: 'user'+Date.now() }));
-  }
+  if(!user) return;
+  const email=user.email.toLowerCase();
+  if(!localStorage.getItem("user_"+email))
+    localStorage.setItem("user_"+email,JSON.stringify({email,balance:5.00,history:[{type:"Welcome Bonus",amount:5,date:Date.now()}],refCode:'user'+Date.now()}));
   loginUser(email);
 });
 
-function loginUser(email) {
-  activeUser = JSON.parse(localStorage.getItem("user_" + email));
-  document.getElementById("authPrompt").classList.add("d-none");
-  document.getElementById("mainContent").classList.remove("locked-content");
-  document.getElementById("navAuthBtns").classList.add("d-none");
-  document.getElementById("navBalanceContainer").classList.remove("d-none");
-  document.getElementById("logoutBtn").classList.remove("d-none");
-  document.getElementById("referralLink").innerText = window.location.origin + window.location.pathname + "?ref=" + activeUser.refCode;
+function loginUser(email){
+  activeUser=JSON.parse(localStorage.getItem("user_"+email));
+  authPrompt.classList.add("d-none");
+  mainContent.classList.remove("locked-content");
+  navAuthBtns.classList.add("d-none");
+  navBalanceContainer.classList.remove("d-none");
+  logoutBtn.classList.remove("d-none");
+  referralLink.innerText=window.location.origin+window.location.pathname+"?ref="+activeUser.refCode;
   updateUI();
   initYouTubePlayer();
 }
 
-function updateUI() {
-  if (!activeUser) return;
-  document.querySelectorAll(".balance-text").forEach(el => {
-    el.textContent = parseFloat(activeUser.balance).toFixed(2);
-  });
-  
-  const historyBox = document.getElementById("historyList");
-  if(activeUser.history) {
-      historyBox.innerHTML = activeUser.history.map(item => `
-        <div class="history-item d-flex justify-content-between align-items-center shadow-sm">
-            <div>
-                <div class="fw-bold">${item.type}</div>
-                <div class="text-muted small">${new Date(item.date).toLocaleTimeString()}</div>
-            </div>
-            <span class="text-success fw-bold">+$${parseFloat(item.amount).toFixed(2)}</span>
+function updateUI(){
+  if(!activeUser) return;
+  document.querySelectorAll(".balance-text").forEach(el=>el.textContent=parseFloat(activeUser.balance).toFixed(2));
+  if(activeUser.history){
+    historyList.innerHTML=activeUser.history.map(item=>`
+      <div class="history-item d-flex justify-content-between align-items-center shadow-sm">
+        <div>
+          <div class="fw-bold">${item.type}</div>
+          <div class="text-muted small">${new Date(item.date).toLocaleTimeString()}</div>
         </div>
-      `).reverse().join('');
+        <span class="text-success fw-bold">+$${parseFloat(item.amount).toFixed(2)}</span>
+      </div>
+    `).reverse().join('');
   }
 }
 
-/* ================= EARNING LOGIC ================= */
-
-function processReward() {
-  // 1. Stop the clock
+/* VIDEO EARNING LOGIC */
+function processReward(){
   clearInterval(watchTimer);
-  
-  // 2. Lock earning for this specific video
-  canEarnOnThisVideo = false;
-
-  // 3. Add $1.00
-  const rewardAmount = 1.00;
-  activeUser.balance = (parseFloat(activeUser.balance) + rewardAmount);
-  
-  // 4. Update History
-  activeUser.history.push({ 
-    type: "Watch Reward", 
-    amount: rewardAmount, 
-    date: Date.now() 
-  });
-  
-  // 5. Save and Update Screen
-  localStorage.setItem("user_" + activeUser.email, JSON.stringify(activeUser));
+  canEarnOnThisVideo=false;
+  activeUser.balance+=1.00;
+  activeUser.history.push({type:"Watch Reward",amount:1.00,date:Date.now()});
+  localStorage.setItem("user_"+activeUser.email,JSON.stringify(activeUser));
   updateUI();
-  
-  // 6. Update Message to prompt for Next Video
-  const statusEl = document.getElementById("status-message");
-  statusEl.classList.replace("alert-info", "alert-success");
-  statusEl.innerHTML = `<strong>🎉 $1.00 Added!</strong> Maximum earned for this video. Click "Next Video" to continue.`;
-  
-  // Make the Next button pulse to guide the user
-  document.getElementById("nextBtn").classList.add("btn-pulse");
+  status-message.className="alert alert-success py-2 mb-3 text-center";
+  status-message.innerHTML=`<strong>🎉 $1.00 Added!</strong> Maximum earned for this video. Click "Next Video" to continue.`;
+  nextBtn.classList.add("btn-pulse");
 }
 
-function onPlayerStateChange(event) {
-  const statusEl = document.getElementById("status-message");
-  
-  // Only start timer if the video is playing AND we haven't earned from this video yet
-  if (event.data == YT.PlayerState.PLAYING && canEarnOnThisVideo) {
-    statusEl.classList.replace("alert-secondary", "alert-info");
-    
-    clearInterval(watchTimer);
-    watchTimer = setInterval(() => {
-      secondsElapsed++;
-      statusEl.innerHTML = `<i class="fas fa-clock fa-spin me-2"></i> Watching: ${secondsElapsed}s / 60s (Earning $1.00)`;
-      
-      if (secondsElapsed >= 60) {
-        processReward();
-      }
-    }, 1000);
-
-  } else if (event.data == YT.PlayerState.PLAYING && !canEarnOnThisVideo) {
-    // If they keep playing the same video after earning
-    statusEl.innerHTML = `Earning locked. Please click "Next Video" to earn more.`;
-    statusEl.classList.replace("alert-info", "alert-warning");
-
-  } else {
-    // Stopped/Paused
-    clearInterval(watchTimer);
+function onPlayerStateChange(event){
+  clearInterval(watchTimer);
+  if(event.data==YT.PlayerState.PLAYING){
+    if(canEarnOnThisVideo){
+      status-message.className="alert alert-info py-2 mb-3 text-center";
+      secondsElapsed=0;
+      watchTimer=setInterval(()=>{
+        secondsElapsed++;
+        status-message.innerHTML=`<i class="fas fa-clock fa-spin me-2"></i> Watching: ${secondsElapsed}s / 60s (Earning $1.00)`;
+        if(secondsElapsed>=60) processReward();
+      },1000);
+    } else {
+      status-message.className="alert alert-warning py-2 mb-3 text-center";
+      status-message.innerHTML="Earning locked. Please click 'Next Video' to earn more.";
+    }
   }
 }
 
-function playNextVideo() {
-  // 1. Reset everything for the new video
-  secondsElapsed = 0;
-  canEarnOnThisVideo = true;
-  
-  // 2. Clean up UI
-  document.getElementById("nextBtn").classList.remove("btn-pulse");
-  const statusEl = document.getElementById("status-message");
-  statusEl.classList.remove("alert-success", "alert-warning");
-  statusEl.classList.add("alert-secondary");
-  statusEl.innerHTML = "Loading next video... Play to start earning.";
-  
-  // 3. Go to next video in YouTube playlist
-  if (player && player.nextVideo) player.nextVideo();
+function playNextVideo(){
+  secondsElapsed=0;
+  canEarnOnThisVideo=true;
+  nextBtn.classList.remove("btn-pulse");
+  status-message.className="alert alert-secondary py-2 mb-3 text-center";
+  status-message.innerHTML="Loading next video... Play to start earning.";
+  if(player && player.nextVideo) player.nextVideo();
 }
 
-/* ================= SYSTEM UTILS ================= */
-
-function initYouTubePlayer() {
-  if (!window.YT) {
-    const s = document.createElement("script");
-    s.src = "https://www.youtube.com/iframe_api";
+function initYouTubePlayer(){
+  if(!window.YT){
+    const s=document.createElement("script");
+    s.src="https://www.youtube.com/iframe_api";
     document.body.appendChild(s);
-  } else { onYouTubeIframeAPIReady(); }
+  } else onYouTubeIframeAPIReady();
 }
 
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player("player", {
-    height: '100%', width: '100%',
-    playerVars: { 
-        listType: "playlist", 
-        list: "PLeS3wE0be6j30ZBIW7lK6xnZSNMGybmoG", 
-        autoplay: 0 
-    },
-    events: { 'onStateChange': onPlayerStateChange }
+function onYouTubeIframeAPIReady(){
+  player=new YT.Player("player",{
+    height:'100%', width:'100%',
+    playerVars:{listType:"playlist",list:"PLeS3wE0be6j30ZBIW7lK6xnZSNMGybmoG",autoplay:0},
+    events:{'onStateChange':onPlayerStateChange}
   });
 }
 
-function copyReferral() {
-    navigator.clipboard.writeText(document.getElementById("referralLink").innerText);
-    alert("Link copied!");
-}
-
-function handleWithdraw() {
-    if(activeUser.balance < 100) alert("Minimum $100.00 required.");
-    else alert("Request sent!");
-}
-
-function logoutUser() { auth.signOut().then(() => location.reload()); }
+function copyReferral(){navigator.clipboard.writeText(referralLink.innerText);alert("Link copied!");}
+function handleWithdraw(){if(activeUser.balance<100)alert("Minimum $100.00 required.");else alert("Request sent!");}
+function logoutUser(){auth.signOut().then(()=>location.reload());}
 </script>
 </body>
 </html>
